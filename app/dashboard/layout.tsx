@@ -1,6 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { redirect } from "next/navigation";
+"use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -14,15 +12,13 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { LogOut } from "lucide-react";
 
-// --- UserMenu (Client Component) ---
-// (ส่วนนี้เหมือนเดิม)
+// UserMenu (Client Component)
 function UserMenu({ user }: { user: { name?: string | null; email?: string | null } }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative size-8 rounded-full">
           <Avatar className="size-8">
-            <AvatarImage src="#" alt={user.name || "User"} />
             <AvatarFallback>
               {user.name?.charAt(0).toUpperCase() || "U"}
             </AvatarFallback>
@@ -50,29 +46,18 @@ function UserMenu({ user }: { user: { name?: string | null; email?: string | nul
   );
 }
 
-// --- Main Layout (Server Component) ---
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // --- ⬇️ 1. COMMENT OUT การตรวจสอบ session จริง ---
-  // const session = await getServerSession(authOptions);
-
-  // if (!session) {
-  //   redirect("/login");
-  // }
-  // --- จบส่วนที่ 1 ---
-
-
-  // --- ⬇️ 2. สร้าง MOCK SESSION สำหรับการพัฒนา ---
+  // Mock Session
   const session = {
     user: {
       name: "Developer",
       email: "dev@example.com"
     }
   };
-  // --- จบส่วนที่ 2 ---
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -82,7 +67,6 @@ export default async function DashboardLayout({
             Epi-North Dashboard
           </Link>
         </nav>
-        {/* ส่วนนี้จะยังทำงานได้ เพราะเรามี mock session */}
         <UserMenu user={session.user} />
       </header>
       <main className="flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">

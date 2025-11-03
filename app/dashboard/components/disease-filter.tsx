@@ -45,7 +45,7 @@ export default function DiseaseFilter({
   };
 
   const currentLabel =
-    allGroups.find((group) => group.value === currentGroup)?.label ||
+    allGroups?.find((group) => group.value === currentGroup)?.label ||
     "เลือกกลุ่มโรค...";
 
   return (
@@ -68,7 +68,7 @@ export default function DiseaseFilter({
             <CommandEmpty>ไม่พบกลุ่มโรค</CommandEmpty>
             <CommandGroup>
               {/* ⭐️ ลบ Hardcode ทิ้ง แล้ว Map จาก props แทน */}
-              {allGroups.map((group) => (
+              {allGroups?.map((group) => (
                 <CommandItem
                   key={group.value}
                   value={group.value}
