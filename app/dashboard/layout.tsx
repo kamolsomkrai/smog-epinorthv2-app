@@ -1,5 +1,6 @@
-"use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+"use client"; // ⭐️ เพิ่มบรรทัดนี้
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { LogOut } from "lucide-react";
 
-// UserMenu (Client Component)
+// --- UserMenu (Client Component) ---
 function UserMenu({ user }: { user: { name?: string | null; email?: string | null } }) {
   return (
     <DropdownMenu>
@@ -46,6 +47,7 @@ function UserMenu({ user }: { user: { name?: string | null; email?: string | nul
   );
 }
 
+// --- Main Layout (Client Component) ---
 export default function DashboardLayout({
   children,
 }: {

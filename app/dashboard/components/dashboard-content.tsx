@@ -1,42 +1,24 @@
-"use client"; // 👈 1. นี่คือ Client Component
+"use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DiseaseFilter from "./disease-filter";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import dynamic from "next/dynamic"; // 👈 2. Import 'dynamic' ที่นี่
+import MonthlyChart from "./monthly-chart";
 
-// 3. Import Types จาก lib/data.ts (เพื่อให้รู้จัก props)
-import type { KpiData, ChartData, TableData, DiseaseGroup } from "@/lib/data";
-
-// ⭐️ 4. ใช้ dynamic import *ภายใน* Client Component นี้
-const MonthlyChart = dynamic(
-  () => import("./monthly-chart"),
-  {
-    ssr: false, // 👈 'ssr: false' ปลอดภัยแล้วใน Client Component
-    loading: () => (
-      <Card className="col-span-1">
-        <CardHeader>
-          <CardTitle>แนวโน้มผู้ป่วยรายเดือน</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px] w-full animate-pulse rounded-lg bg-muted" />
-        </CardContent>
-      </Card>
-    )
-  }
-);
-
-// 5. กำหนด props ที่จะรับจาก page.tsx
+// กำหนด types สำหรับ props
 interface DashboardContentProps {
-  allDiseaseGroups: DiseaseGroup[];
+  allDiseaseGroups: any[];
   currentDiseaseGroup: string;
-  kpiData: KpiData;
-  chartData: ChartData[];
-  tableData: TableData[];
+  kpiData: {
+    diseaseName: string;
+    totalCases: number;
+    ratePer100k: string;
+  };
+  chartData: any[];
+  tableData: any[];
 }
 
-// 6. สร้าง Component ที่รับ props และแสดงผล UI ทั้งหมด
 export default function DashboardContent({
   allDiseaseGroups,
   currentDiseaseGroup,
@@ -45,7 +27,6 @@ export default function DashboardContent({
   tableData
 }: DashboardContentProps) {
 
-  // ย้าย chartConfig มาไว้ที่นี่
   const chartConfig = {
     cases: {
       label: "จำนวนผู้ป่วย (ราย)",
@@ -55,7 +36,6 @@ export default function DashboardContent({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* ส่วนที่ 1: Filter */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h2 className="text-2xl font-bold tracking-tight">
           ภาพรวมสถานการณ์
@@ -66,7 +46,6 @@ export default function DashboardContent({
         />
       </div>
 
-      {/* ส่วนที่ 2: KPI Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
@@ -82,7 +61,7 @@ export default function DashboardContent({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {kpiData?.totalCases.toLocaleString()}
+              {kpiData.totalCases.toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -96,11 +75,8 @@ export default function DashboardContent({
         </Card>
       </div>
 
-      {/* ส่วนที่ 3: Chart และ Table */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-
-        {/* 7. เรียกใช้กราฟ (ที่ import แบบ dynamic) */}
-        <MonthlyChart chartData={chartData} chartConfig={chartConfig as any} />
+        <MonthlyChart chartData={chartData} chartConfig={chartConfig} />
 
         <Card className="col-span-1 lg:col-span-1">
           <CardHeader>

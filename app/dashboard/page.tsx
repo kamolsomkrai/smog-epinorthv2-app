@@ -1,4 +1,3 @@
-
 import {
   getKpiData,
   getChartData,
@@ -7,7 +6,7 @@ import {
 } from "@/lib/data";
 import DashboardContent from "./components/dashboard-content";
 
-// ⭐️ แก้ไขสำหรับ Next.js 14 - searchParams เป็น Promise
+// ⭐️ แก้ไข Type - รับ searchParams เป็น Promise
 export default async function DashboardPage({
   searchParams,
 }: {
