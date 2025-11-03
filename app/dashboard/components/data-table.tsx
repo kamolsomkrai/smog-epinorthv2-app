@@ -11,7 +11,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"; // [1]
+} from "@tanstack/react-table";
 
 import {
   Table,
@@ -20,12 +20,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"; // [2]
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-// [1] อ้างอิงจาก @tanstack/react-table ใน package.json
-// [2] อ้างอิงจาก components/ui/table.tsx (shadcn/ui)
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -56,9 +53,14 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  // ⭐️ 1. FIX: 
+  // เปลี่ยนวิธีตรวจสอบคอลัมน์ จาก 'getColumn' (ซึ่งจะ Error)
+  // เป็น 'getAllColumns().some' (ซึ่งปลอดภัย)
+  const hasGroupnameFilter = table.getAllColumns().some(col => col.id === "groupname");
+
   return (
     <div>
-      <div className="flex items-center py-4">
+      <div className="flex flex-col gap-4 py-4 md:flex-row">
         <Input
           placeholder="กรองตามจังหวัด..."
           value={
@@ -69,7 +71,23 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+
+        {/* ⭐️ 2. ใช้ 'hasGroupnameFilter' ที่ปลอดภัยแล้ว */}
+        {hasGroupnameFilter && (
+          <Input
+            placeholder="กรองตามกลุ่มโรค..."
+            value={
+              (table.getColumn("groupname")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn("groupname")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        )}
       </div>
+
+      {/* --- ส่วนที่เหลือของตารางเหมือนเดิม --- */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -91,8 +109,8 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table?.getRowModel().rows?.length ? (
-              table?.getRowModel().rows.map((row) => (
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}

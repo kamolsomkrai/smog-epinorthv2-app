@@ -2,44 +2,67 @@ import {
   getKpiData,
   getChartData,
   getTableData,
-  getDiseaseGroups
+  getDiseaseGroups,
+  getWeeklyProvincialReport,
+  getAvailableYears
 } from "@/lib/data";
 import DashboardContent from "./components/dashboard-content";
+import { Suspense } from "react";
 
-// ⭐️ แก้ไข Type - รับ searchParams เป็น Promise
+// ⭐️ 1. เพิ่มบรรทัดนี้ เพื่อบังคับให้ Next.js ดึงข้อมูลใหม่ทุกครั้ง
+export const dynamic = "force-dynamic";
+
+function DashboardLoading() {
+  return (
+    <div className="flex min-h-screen w-full items-center justify-center">
+      <p className="text-lg text-muted-foreground">กำลังโหลดข้อมูล...</p>
+    </div>
+  );
+}
+
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{
+  searchParams: {
     disease_group?: string | string[];
-  }>;
+    year?: string | string[];
+  };
 }) {
 
-  // ⭐️ ใช้ await เพื่อ unwrap searchParams
-  const params = await searchParams;
+  const allYears = await getAvailableYears();
+  const yearParam = searchParams.year;
+  const currentYear =
+    (typeof yearParam === 'string' ? yearParam : allYears[0]) || new Date().getFullYear().toString();
 
-  // ดึงข้อมูลทั้งหมดใน Server Component
-  const allDiseaseGroups = await getDiseaseGroups();
-
-  // ใช้ params แทน searchParams
-  const diseaseGroupParam = params.disease_group;
+  const allDiseaseGroups = await getDiseaseGroups(currentYear);
+  const diseaseGroupParam = searchParams.disease_group;
   const currentDiseaseGroup =
     (typeof diseaseGroupParam === 'string' ? diseaseGroupParam : allDiseaseGroups[0]?.value) || "all";
 
-  const [kpiData, chartData, tableData] = await Promise.all([
-    getKpiData(currentDiseaseGroup),
-    getChartData(currentDiseaseGroup),
-    getTableData(currentDiseaseGroup)
+  const [
+    kpiData,
+    chartData,
+    tableData,
+    weeklyReportData
+  ] = await Promise.all([
+    getKpiData(currentDiseaseGroup, currentYear),
+    getChartData(currentDiseaseGroup, currentYear),
+    getTableData(currentDiseaseGroup, currentYear),
+    getWeeklyProvincialReport(currentDiseaseGroup, currentYear)
   ]);
 
-  // ส่งข้อมูลทั้งหมดเป็น props ไปให้ Client Component
   return (
-    <DashboardContent
-      allDiseaseGroups={allDiseaseGroups}
-      currentDiseaseGroup={currentDiseaseGroup}
-      kpiData={kpiData}
-      chartData={chartData}
-      tableData={tableData}
-    />
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent
+        allYears={allYears}
+        currentYear={currentYear}
+        allDiseaseGroups={allDiseaseGroups}
+        currentDiseaseGroup={currentDiseaseGroup}
+        kpiData={kpiData}
+        chartData={chartData}
+        tableData={tableData}
+        weeklyReportData={weeklyReportData}
+      />
+    </Suspense>
   );
 }
